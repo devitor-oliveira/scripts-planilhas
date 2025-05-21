@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<head>
+    <base target="top">
+</head>
+<body>
+    <h2>Relatório de Agenciamento | <strong><?= (new Date()).toLocaleString('pt-BR', { month: 'long', year: 'numeric' }) ?></strong></h2>
+    <i>Valores incluem a Despesa Administrativa (DA) de <?= (TAXA_ADMINISTRATIVA * 100) ?>%</i>
+
+    <? if (data.temPagamentos && data.corretores && data.corretores.length > 0) { ?>
+    <? data.corretores.forEach(corretor => { ?>
+      <? if (corretor.itens && corretor.itens.length > 0) {  ?>
+        <div >
+          <h3>Corretor: <?= corretor.corretor ?></h3>
+          <p>
+            TOTAL LÍQUIDO: 
+            <?= toCurrencyFormat(corretor.totalLiquidoCorretor) ?>
+          </p>
+          <ul>
+            <? corretor.itens.forEach(function(item) { ?>
+              <li>
+                <b><?= item.cliente ?>: 
+                <? if (item.isAviso) { ?>
+                  <strong>(Aviso)</strong>
+                <? } else { ?>
+                  <?= toCurrencyFormat(item.valorItem) ?>
+                <? } ?>
+                </b> 
+                [<?= item.detalhes ?>]
+              </li>
+            <? }); ?>
+          </ul>
+        </div>
+      <? } ?>
+    <? }); ?>
+
+    <div>
+      TOTAL GERAL PAGO: <?= toCurrencyFormat(data.totalGeralPago) ?>
+    </div>
+
+  <? } else { ?>
+    <p>Não há pagamentos registrados para este período.</p>
+  <? } ?>
+
+    <h4>Lembre-se de Atualizar as colunas manuais na planilha</h4>
+    <ul>
+        <p><strong>Planilha Clientes</strong></p>
+        <li>Status Cliente</li>
+        <li>Cliente Meses Pagos</li>
+        <li>Inadimplente Mês Atual?</li>
+    </ul>
+    <ul>
+        <p><strong>Planilha Agenciamentos</strong></p>
+        <li>Agenciamento Parte 1 Pago?</li>
+        <li>Agenciamento Parte 2 Pago?</li>
+        <li>Estorno Aplicado?</li>
+        <li>Estorno Já Deduzido?</li>
+    </ul>
+    <ul>
+        <p><strong>Planilha Comissões</strong></p>	
+        <li>Comissões Pagas ao corretor?</li>
+    </ul>
+
+</body>
+</html>
