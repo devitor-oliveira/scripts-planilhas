@@ -18,6 +18,8 @@ Lembre-se de atualizar as variáveis de configuração no código!
 ### Script writeSheets
 - Funções auxiliares para transcrever os dados da planilha principal para as abas
 - Informação sobre as colunas que serão preenchidas manualmente
+- Funções executadas pelo script principal
+- Sem Acionadores
 
 ## Como configurar os acionadores (Gatilhos/Triggers)
 
