@@ -7,7 +7,7 @@ const ID_PLANILHA_MESTRE_MENSAL = SpreadsheetApp.getActiveSpreadsheet().getId();
 const NOME_ABA_CLIENTES_MENSAL = "ClientesStatus";
 const NOME_ABA_AGENCIAMENTOS_MENSAL = "Agenciamentos";
 const NOME_ABA_COMISSOES_MENSAL = "Comissoes";
-const EMAIL_RESPONSAVEL_MENSAL = "vitoroliveiraguedeshugo@gmail.com";
+const EMAIL_RESPONSAVEL_MENSAL = "";
 const ASSUNTO_EMAIL_MENSAL = "Relatório Mensal de Pagamentos a Corretores";
 const TAXA_ADMINISTRATIVA = 0.20;
 

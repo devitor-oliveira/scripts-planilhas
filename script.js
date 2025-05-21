@@ -6,7 +6,7 @@
 const NOME_ABA_CLIENTES = "ClientesStatus";
 const NOME_ABA_AGENCIAMENTOS = "Agenciamentos";
 const NOME_ABA_COMISSOES = "Comissoes";
-const EMAIL_ADMIN_ERRO = "vitoroliveiraguedeshugo@gmail.com";
+const EMAIL_ADMIN_ERRO = "";
 
 // Mapeamento Colunas Formulário -> Chave no Objeto 'dadosForm'
 // Manter a mesma ordem das perguntas do formulário
