@@ -15,8 +15,8 @@ const CONFIG = {
 
   // Configurações de E-mail
   EMAIL_SETTINGS: {
-    ADMIN: "vitoroliveiraguedeshugo@gmail.com", // <-- MUDE AQUI
-    MONTHLY_REPORT_RECIPIENT: "vitoroliveiraguedeshugo@gmail.com", // <-- MUDE AQUI
+    ADMIN: "@gmail.com", // <-- MUDE AQUI
+    MONTHLY_REPORT_RECIPIENT: "@gmail.com", // <-- MUDE AQUI
     MONTHLY_REPORT_SUBJECT: "Relatório Mensal de Pagamentos a Corretores",
   },
 
