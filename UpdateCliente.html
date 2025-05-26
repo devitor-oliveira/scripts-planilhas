@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        body { padding: 15px; }
+        .form-section { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; }
+        .hidden { display: none; }
+        .loader {
+            border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid #3498db;
+            width: 20px; height: 20px; animation: spin 2s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <h5>Atualizar Dados do Cliente</h5>
+
+    <div class="input-field">
+        <input placeholder="Digite o Nome ou CPF" id="search-term" type="text" class="validate">
+        <label for="search-term">Buscar Cliente</label>
+    </div>
+    <button class="btn waves-effect waves-light" onclick="findClient()">Buscar</button>
+    <div class="loader hidden" id="loader"></div>
+
+    <div id="update-form" class="hidden">
+        <input type="hidden" id="client-id" />
+        <h6 style="margin-top:20px;">Cliente: <b id="client-name-display"></b></h6>
+
+        <div class="form-section">
+            <p><b>Status Geral</b></p>
+            <div class="input-field">
+                <select id="status-cliente">
+                    <option value="Ativo">Ativo</option>
+                    <option value="Cancelado">Cancelado</option>
+                    <option value="Inadimplente">Inadimplente</option>
+                </select>
+                <label>Status do Cliente</label>
+            </div>
+            <div class="input-field">
+                <input id="data-cancelamento" type="date">
+                <label for="data-cancelamento">Data de Cancelamento</label>
+            </div>
+            <p><label><input type="checkbox" id="inadimplente-mes"/><span>Inadimplente este mês?</span></label></p>
+        </div>
+
+        <div class="form-section">
+            <p><b>Status dos Pagamentos</b></p>
+            <p><label><input type="checkbox" id="agenc-p1-pago"/><span>Agenciamento Parte 1 Pago?</span></label></p>
+            <p><label><input type="checkbox" id="agenc-p2-pago"/><span>Agenciamento Parte 2 Pago?</span></label></p>
+            <p><label><input type="checkbox" id="estorno-aplicado"/><span>Estorno Aplicado?</span></label></p>
+            <p><label><input type="checkbox" id="estorno-deduzido"/><span>Estorno Já Deduzido?</span></label></p>
+        </div>
+        
+        <div class="form-section">
+            <p><b>Controle de Comissões</b></p>
+            <div class="input-field">
+                <input id="comissoes-pagas-qtd" type="number" min="0">
+                <label for="comissoes-pagas-qtd">Comissões Pagas ao Corretor (Qtd)</label>
+            </div>
+        </div>
+        
+        <button class="btn waves-effect waves-light green" style="margin-top: 20px;" onclick="updateClientData()">Salvar Alterações</button>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.FormSelect.init(document.querySelectorAll('select'));
+        });
+
+        function setLoading(isLoading) {
+            document.getElementById('loader').classList.toggle('hidden', !isLoading);
+        }
+
+        function findClient() {
+            setLoading(true);
+            document.getElementById('update-form').classList.add('hidden');
+            const searchTerm = document.getElementById('search-term').value;
+            google.script.run
+                .withSuccessHandler(onClientFound)
+                .withFailureHandler(onFailure)
+                .findClientData(searchTerm);
+        }
+
+        function onClientFound(data) {
+            setLoading(false);
+            if (!data) {
+                M.toast({html: 'Cliente não encontrado!'});
+                return;
+            }
+            document.getElementById('update-form').classList.remove('hidden');
+            document.getElementById('client-id').value = data.id;
+            document.getElementById('client-name-display').innerText = data.clienteNome;
+            
+            // Preenche os campos
+            document.getElementById('status-cliente').value = data.statusCliente;
+            document.getElementById('data-cancelamento').value = data.dataCancelamento ? new Date(data.dataCancelamento).toISOString().split('T')[0] : '';
+            document.getElementById('inadimplente-mes').checked = data.inadimplenteMes === 'S';
+            document.getElementById('agenc-p1-pago').checked = data.p1Pago === 'S';
+            document.getElementById('agenc-p2-pago').checked = data.p2Pago === 'S';
+            document.getElementById('estorno-aplicado').checked = data.estornoAplicado === 'S';
+            document.getElementById('estorno-deduzido').checked = data.estornoDeduzido === 'S';
+            document.getElementById('comissoes-pagas-qtd').value = data.comissoesPagasQtd || 0; // Preenche o novo campo
+
+            M.FormSelect.init(document.querySelectorAll('select'));
+            M.updateTextFields();
+        }
+
+        function updateClientData() {
+            setLoading(true);
+            const updateObject = {
+                id: document.getElementById('client-id').value,
+                statusCliente: document.getElementById('status-cliente').value,
+                dataCancelamento: document.getElementById('data-cancelamento').value,
+                inadimplenteMes: document.getElementById('inadimplente-mes').checked ? 'S' : 'N',
+                p1Pago: document.getElementById('agenc-p1-pago').checked ? 'S' : 'N',
+                p2Pago: document.getElementById('agenc-p2-pago').checked ? 'S' : 'N',
+                estornoAplicado: document.getElementById('estorno-aplicado').checked ? 'S' : 'N',
+                estornoDeduzido: document.getElementById('estorno-deduzido').checked ? 'S' : 'N',
+                comissoesPagasQtd: document.getElementById('comissoes-pagas-qtd').value // Coleta o novo campo
+            };
+            google.script.run
+                .withSuccessHandler(onUpdateSuccess)
+                .withFailureHandler(onFailure)
+                .updateClientData(updateObject);
+        }
+
+        function onUpdateSuccess(message) {
+            setLoading(false);
+            M.toast({html: message, classes: 'green'});
+            document.getElementById('update-form').classList.add('hidden');
+            document.getElementById('search-term').value = '';
+        }
+
+        function onFailure(error) {
+            setLoading(false);
+            M.toast({html: 'Erro: ' + error.message, classes: 'red'});
+        }
+    </script>
+</body>
+</html>

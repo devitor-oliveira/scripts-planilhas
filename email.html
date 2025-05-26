@@ -1,64 +1,119 @@
 <!DOCTYPE html>
+<html>
 <head>
-    <base target="top">
+    <base target="_top">
 </head>
-<body>
-    <h2>Relatório de Agenciamento | <strong><?= (new Date()).toLocaleString('pt-BR', { month: 'long', year: 'numeric' }) ?></strong></h2>
-    <i>Valores incluem a Despesa Administrativa (DA) de <?= (TAXA_ADMINISTRATIVA * 100) ?>%</i>
+<body style="font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background-color: #f4f4f4;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#f4f4f4">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                <table width="700" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse; background-color: #ffffff; border: 1px solid #ddd;">
+                    <tr>
+                        <td align="center" bgcolor="#0d47a1" style="padding: 20px 0; color: #ffffff;">
+                            <h1 style="margin: 0; font-size: 28px;">Relatório de Pagamentos</h1>
+                            <p style="margin: 5px 0 0 0; font-size: 16px;"><?= new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' }) ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px 30px; border-bottom: 1px solid #eee;">
+                            <h2 style="margin: 0; color: #0d47a1; font-size: 20px;">Resumo Geral do Mês</h2>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 10px; font-size: 14px;">
+                                <tr>
+                                    <td style="padding: 5px 0;">Total Bruto (Base de Cálculo):</td>
+                                    <td align="right" style="font-weight: bold;"><?= data.toCurrencyFormat(data.totalGeralBruto) ?></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0;">Total Despesa Administrativa (<?= (data.TAXA_ADMINISTRATIVA * 100).toFixed(0) ?>%):</td>
+                                    <td align="right" style="font-weight: bold; color: #b30000;">- <?= data.toCurrencyFormat(data.despesaAdminTotal) ?></td>
+                                </tr>
+                                <tr style="border-top: 2px solid #ccc; font-size: 16px;">
+                                    <td style="padding: 8px 0; font-weight: bold;">TOTAL LÍQUIDO PAGO:</td>
+                                    <td align="right" style="font-weight: bold; color: #2e7d32;"><?= data.toCurrencyFormat(data.totalGeralLiquido) ?></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <? if (data.temPagamentos && data.corretores && data.corretores.length > 0) { ?>
+                        <? data.corretores.forEach(corretor => { ?>
+                            <tr>
+                                <td style="padding: 20px 30px; border-bottom: 1px solid #eee;">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tr>
+                                            <td><h3 style="margin: 0; color: #1565c0; font-size: 18px;">Corretor: <?= corretor.corretor ?></h3></td>
+                                            <td align="right" style="font-size: 16px;">
+                                                Líquido a Receber: <strong style="color: #2e7d32;"><?= data.toCurrencyFormat(corretor.totalLiquidoCorretor) ?></strong>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p style="margin: 5px 0 15px 0; font-size: 12px; color: #666;">
+                                        (Valor Bruto: <?= data.toCurrencyFormat(corretor.totalBrutoCorretor) ?>)
+                                    </p>
 
-    <? if (data.temPagamentos && data.corretores && data.corretores.length > 0) { ?>
-    <? data.corretores.forEach(corretor => { ?>
-      <? if (corretor.itens && corretor.itens.length > 0) {  ?>
-        <div >
-          <h3>Corretor: <?= corretor.corretor ?></h3>
-          <p>
-            TOTAL LÍQUIDO: 
-            <?= toCurrencyFormat(corretor.totalLiquidoCorretor) ?>
-          </p>
-          <ul>
-            <? corretor.itens.forEach(function(item) { ?>
-              <li>
-                <b><?= item.cliente ?>: 
-                <? if (item.isAviso) { ?>
-                  <strong>(Aviso)</strong>
-                <? } else { ?>
-                  <?= toCurrencyFormat(item.valorItem) ?>
-                <? } ?>
-                </b> 
-                [<?= item.detalhes ?>]
-              </li>
-            <? }); ?>
-          </ul>
-        </div>
-      <? } ?>
-    <? }); ?>
+                                    <? corretor.itens.forEach(function(item) { ?>
+                                        <div style="border: 1px solid #e0e0e0; border-left: 4px solid #1565c0; padding: 15px; margin-bottom: 15px; border-radius: 4px;">
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                <tr> <td style="font-size: 16px; font-weight: bold;">
+                                                        <?= item.cliente ?>
+                                                        <? if (item.clienteEstaInadimplente) { ?>
+                                                            <span style="color: #b30000; font-size: 12px; font-weight: normal;"> (Inadimplente este mês)</span>
+                                                        <? } ?>
+                                                    </td>
+                                                    <td align="right" style="font-size: 16px; font-weight: bold; color: <?= item.clienteEstaInadimplente || item.isAviso ? '#b30000' : (item.valorLiquidoItem === 0 && !item.detalhes.includes("Nenhuma movimentação") ? '#757575' : '#1a1a1a') ?>;">
+                                                        <? if (item.clienteEstaInadimplente && item.isAviso) { ?>
+                                                            (Comissão Suspensa)
+                                                        <? } else if (item.clienteEstaInadimplente) { ?>
+                                                            <?= data.toCurrencyFormat(item.valorLiquidoItem) ?>
+                                                        <? } else if (item.isAviso) { ?>
+                                                            (Ver Detalhes)
+                                                        <? } else { ?>
+                                                            <?= data.toCurrencyFormat(item.valorLiquidoItem) ?>
+                                                        <? } ?>
+                                                    </td>
+                                                </tr>
+                                                <tr> <td colspan="2" style="padding-top: 2px; font-size: 11px; color: #757575;">
+                                                        Prêmio Mensal: <?= data.toCurrencyFormat(item.premioMensalCliente) ?>
+                                                    </td>
+                                                </tr>
+                                                <tr> <td colspan="2" style="padding-top: 5px; font-size: 12px; color: <?= item.clienteEstaInadimplente || item.isAviso ? '#b30000' : '#666' ?>;">
+                                                        <i>Detalhamento do Cálculo: <?= item.detalhes ?></i>
+                                                    </td>
+                                                </tr>
+                                                <? if (item.infoAgenciamentoP2 || item.infoComissao) { ?>
+                                                <tr> <td colspan="2" style="padding-top: 10px; font-size: 13px;">
+                                                        <? if (item.infoAgenciamentoP2) { ?>
+                                                            <div style="margin-top: 5px;">&#128176; <?= item.infoAgenciamentoP2 ?></div>
+                                                        <? } ?>
+                                                        <? if (item.infoComissao) { ?>
+                                                            <div style="margin-top: 5px;">&#128181; <?= item.infoComissao ?></div>
+                                                        <? } ?>
+                                                    </td>
+                                                </tr>
+                                                <? } ?>
+                                                <tr> <td colspan="2" style="padding-top: 10px; border-top: 1px dashed #ccc; margin-top: 10px; font-size: 12px; color: #555;">
+                                                        <b style="font-size: 13px;">Taxas Contratadas:</b>
+                                                        <span style="margin-left: 10px;">Ag. P1: <b><?= item.taxaP1 ?>%</b></span>
+                                                        <? if (item.taxaP2 > 0) { ?>
+                                                            <span style="margin-left: 10px;">| Ag. P2: <b><?= item.taxaP2 ?>%</b></span>
+                                                        <? } ?>
+                                                        <span style="margin-left: 10px;">| Corretagem: <b><?= item.taxaComissao ?>%</b></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    <? }); ?>
+                                </td>
+                            </tr>
+                        <? }); ?>
+                    <? } else { ?>
+                        <tr><td style="padding: 30px; text-align: center;">Não há pagamentos ou avisos registrados para este período.</td></tr>
+                    <? } ?>
 
-    <div>
-      TOTAL GERAL PAGO: <?= toCurrencyFormat(data.totalGeralPago) ?>
-    </div>
-
-  <? } else { ?>
-    <p>Não há pagamentos registrados para este período.</p>
-  <? } ?>
-
-    <h4>Lembre-se de Atualizar as colunas manuais na planilha</h4>
-    <ul>
-        <p><strong>Planilha Clientes</strong></p>
-        <li>Status Cliente</li>
-        <li>Cliente Meses Pagos</li>
-        <li>Inadimplente Mês Atual?</li>
-    </ul>
-    <ul>
-        <p><strong>Planilha Agenciamentos</strong></p>
-        <li>Agenciamento Parte 1 Pago?</li>
-        <li>Agenciamento Parte 2 Pago?</li>
-        <li>Estorno Aplicado?</li>
-        <li>Estorno Já Deduzido?</li>
-    </ul>
-    <ul>
-        <p><strong>Planilha Comissões</strong></p>	
-        <li>Comissões Pagas ao corretor?</li>
-    </ul>
-
-</body>
-</html>
+                    <tr>
+                        <td bgcolor="#f4f4f4" style="padding: 20px 30px; font-size: 12px; color: #666;">
+                            <h4 style="margin: 0 0 10px 0; color: #333;">Lembretes de Atualização Manual</h4>
+                            <p style="margin: 5px 0;">Lembre-se de atualizar as colunas manuais nas abas da planilha para garantir a precisão dos próximos relatórios:</p>
+                            <ul style="margin: 10px 0 0 20px; padding: 0;">
+                                <li><b>Aba Cliente:</b> Status Cliente, Cliente Meses Pagos (Qtd), Inadimplente Mês Atual? (S/N), Data Cancelamento</li>
+                                <li><b>Aba Agenciamento:</b> Agenc Parte 1 Pago? (S/N), Agenc Parte 2 Pago? (S/N), Estorno Aplicado? (S/N), Estorno Já Deduzido? (S/N)</li>
+                                <li><b>Aba Comissao:</b> Comissões Pagas Corretor (Qtd
